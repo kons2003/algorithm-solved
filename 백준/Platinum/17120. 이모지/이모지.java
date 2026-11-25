@@ -32,39 +32,12 @@ public class Main {
         }
     }
 
-    // 고양이 이모지 찾기
     public static boolean hasExactWord(String text, Set<String> words) {
         for (String word : words) {
-            if (hasExactWord(text, word)) {
+            if (text.contains(word)) {
                 return true;
             }
         }
-        return false;
-    }
-
-    public static boolean hasExactWord(String text, String word) {
-        if (text == null || word == null || word.isEmpty()) {
-            return false;
-        }
-
-        int index = text.indexOf(word);
-
-        // ":cat:"의 앞뒤에 문자 없는지 체크
-        while (index != -1) {
-            int endIndex = index + word.length();
-
-            boolean isStartOk = index == 0
-                    || Character.isWhitespace(text.charAt(index - 1));
-            boolean isEndOk = endIndex == text.length()
-                    || Character.isWhitespace(text.charAt(endIndex));
-
-            if (isStartOk && isEndOk) {
-                return true;
-            }
-
-            index = text.indexOf(word, index + 1);
-        }
-
         return false;
     }
 }
