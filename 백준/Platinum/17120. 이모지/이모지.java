@@ -28,11 +28,6 @@ public class Main {
             String processedLine = removeInlineCode(line); // 인라인 코드 제거
             processedLine = removeLinks(processedLine); // 링크 제거
 
-            // IPv6 주소로 인식되는 문자열 제거
-            processedLine = removeCode(processedLine,
-                    "(?i)(?:^|[^:A-F0-9])(?:[A-F0-9]{1,4}:){7}"
-                            + "[A-F0-9]{1,4}(?:[^:A-F0-9]|$)");
-
             // ":cat:" 이거나 🐱이면 YES
             if (hasExactWord(processedLine) || processedLine.contains("\uD83D\uDC31")) {
                 System.out.println("YES");
@@ -49,7 +44,12 @@ public class Main {
 
     // 인라인 코드 제거(`:cat:`)
     public static String removeInlineCode(String text) {
-        return removeCode(text, "(?<!`)`\\s*\\S[^`]*?`(?!`)(?=[\\s.,\\])}!?\\-=]|$)");
+        // 백틱 앞에 올 수 있는 문자 제한
+        String boundary = "(?:^|(?<=[\\s~_*\\\\/?.,\\-!^;:{(\\[%$#+="
+                + "\\u2000-\\u206F\\u2E00-\\u2E7F\"]))";
+
+        return removeCode(text,
+                boundary + "(?<!`)`\\s*\\S[^`]*?`(?!`)");
     }
 
     // 백틱 3개로 감싼 코드 블록 제거
