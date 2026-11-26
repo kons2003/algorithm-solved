@@ -10,25 +10,26 @@ public class Main {
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        List<String> lines = new ArrayList<>(); // 모든 입력 저장 ArrayList
-        String line; // EOF 처리를 위한 String
+        List<String> inputLines = new ArrayList<>(); // 모든 입력 저장 ArrayList
+        String inputLine; // EOF 처리를 위한 String
 
-        // 모든 입력 받기
-        while ((line = br.readLine()) != null) {
-            lines.add(line);
+        // 전체 메시지 입력
+        while ((inputLine = br.readLine()) != null) {
+            inputLines.add(inputLine);
         }
 
-        // 전체 문자열 합친 후, 코드 블록 제거 및 배열로 변환
-        String[] parts = removeCodeBlocks(String.join("\n", lines)).split("\n", -1);
+        // 전체 문자열 한 줄로 합침
+        String fullInput = String.join("\n", inputLines);
 
-        for (int i = 0; i < lines.size(); i++) {
+        // 코드 블록 제거 후 줄마다 배열에 저장
+        String[] linesWithoutCodeBlocks = removeCodeBlocks(fullInput).split("\n", -1);
 
-            // 인라인 코드 제거 (`:cat:`)
-            line = parts[i].replaceAll("(^|[^`])`[^`]+`([^`]|$)", "$1 $2");
+        for (String line : linesWithoutCodeBlocks) {
+            String processedLine = removeInlineCode(line); // 인라인 코드 제거
+            processedLine = removeLinks(processedLine); // 링크 제거
 
-            // ":cat:"이거나 🐱이면 YES
-            if (hasExactWord(line)
-                    || lines.get(i).contains("\uD83D\uDC31")) {
+            // ":cat:" 이거나 🐱이면 YES
+            if (hasExactWord(processedLine) || processedLine.contains("\uD83D\uDC31")) {
                 System.out.println("YES");
             } else {
                 System.out.println("NO");
@@ -36,17 +37,29 @@ public class Main {
         }
     }
 
-    // 백틱 3개 이상으로 감싼 코드 블록 제거
+    // 코드 블록 제거(```:cat:```)
     public static String removeCodeBlocks(String text) {
-        Pattern pattern = Pattern.compile("```[\\s\\S]+?`{3,}");
+        return removeCode(text, "```[\\s\\S]+?`{3,}");
+    }
+
+    // 인라인 코드 제거(`:cat:`)
+    public static String removeInlineCode(String text) {
+        return removeCode(text, "(?<!`)`\\s*\\S[^`]*?`(?!`)");
+    }
+
+    // 백틱 3개로 감싼 코드 블록 제거
+    public static String removeCode(String text, String regex) {
+        Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(text);
 
         char[] chars = text.toCharArray();
 
         while (matcher.find()) {
             for (int i = matcher.start(); i < matcher.end(); i++) {
-                // 줄바꿈을 제외한 문자를 공백으로 치환
-                if (chars[i] != '\n') {
+                // 🐱이거나 줄바꿈은 유지
+                if (text.startsWith("\uD83D\uDC31", i)) {
+                    i++;
+                } else if (chars[i] != '\n') {
                     chars[i] = ' ';
                 }
             }
@@ -54,7 +67,30 @@ public class Main {
         return new String(chars);
     }
 
-    // 고양이 이모지 찾기
+    // 링크 주소 제거 및 표시 문구 유지(https://example.com|:cat: -> :cat:
+    public static String removeLinks(String text) {
+        Pattern pattern = Pattern.compile("<([^|>]*)(?:\\|([^>]*))?>");
+        Matcher matcher = pattern.matcher(text);
+
+        StringBuilder visibleText = new StringBuilder(); // 링크 제거 및 표시 문구 유지된 문자열 저장 변수
+
+        while (matcher.find()) {
+            String linkLabel = matcher.group(2);
+
+            // 표시 문구만 남김(링크의 주소 제거), 주소에 🐱가 있으면 🐱는 남김
+            if (linkLabel == null) {
+                linkLabel = matcher.group(1).contains("\uD83D\uDC31") ? "\uD83D\uDC31" : "";
+            }
+
+            matcher.appendReplacement(visibleText, Matcher.quoteReplacement(" " + linkLabel + " "));
+        }
+
+        matcher.appendTail(visibleText);
+
+        return visibleText.toString();
+    }
+
+    // 고양이 이모지 찾기(:dog:cat:은 안됨, :dog::cat:은 가능)
     public static boolean hasExactWord(String text) {
         Pattern pattern = Pattern.compile(":[a-zA-Z0-9_+\\-]+:");
         Matcher matcher = pattern.matcher(text);
