@@ -19,8 +19,7 @@ public class Main {
         }
 
         // 전체 문자열 한 줄로 합침
-        String fullInput = String.join("\n", inputLines)
-                .replaceAll("(?i)&#(?:0*128049|x0*1f431);", "\uD83D\uDC31"); // HTML 숫자 문자 표현 치환
+        String fullInput = String.join("\n", inputLines);
 
         // 코드 블록 제거 후 줄마다 배열에 저장
         String[] linesWithoutCodeBlocks = removeCodeBlocks(fullInput).split("\n", -1);
@@ -80,7 +79,7 @@ public class Main {
 
             // 표시 문구만 남김(링크의 주소 제거), 주소에 🐱가 있으면 🐱는 남김
             if (linkLabel == null) {
-                linkLabel = matcher.group(1).contains("\uD83D\uDC31") ? "\uD83D\uDC31" : "";
+                linkLabel = matcher.group(1);
             }
 
             matcher.appendReplacement(visibleText, Matcher.quoteReplacement(" " + linkLabel + " "));
