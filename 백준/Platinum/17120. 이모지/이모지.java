@@ -49,7 +49,7 @@ public class Main {
 
     // 백틱 3개로 감싼 코드 블록 제거
     public static String removeCode(String text, String regex) {
-        Pattern pattern = Pattern.compile(regex, Pattern.UNICODE_CHARACTER_CLASS);
+        Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(text);
 
         char[] chars = text.toCharArray();
@@ -69,7 +69,7 @@ public class Main {
 
     // 링크 주소 제거 및 표시 문구 유지(https://example.com|:cat: -> :cat:
     public static String removeLinks(String text) {
-        Pattern pattern = Pattern.compile("<([^|>]*)(?:\\|([^>]*))?>");
+        Pattern pattern = Pattern.compile("<([^|>]*)(?:\\|([^|>]*)(?:\\|[^>]*)?)?>");
         Matcher matcher = pattern.matcher(text);
 
         StringBuilder visibleText = new StringBuilder(); // 링크 제거 및 표시 문구 유지된 문자열 저장 변수
