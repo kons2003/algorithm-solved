@@ -92,7 +92,9 @@ public class Main {
 
     // 고양이 이모지 찾기(:dog:cat:은 안됨, :dog::cat:은 가능, :아:cat: 안됨)
     public static boolean hasExactWord(String text) {
-        Pattern pattern = Pattern.compile(":[\\p{L}\\p{N}_+.\\-]+:");
+        Pattern pattern = Pattern.compile(
+                ":(?:[\\p{L}\\p{N}_][\\p{L}\\p{N}_+\\-]*|[+-][0-9]+):"
+        );
         Matcher matcher = pattern.matcher(text);
 
         while (matcher.find()) {
