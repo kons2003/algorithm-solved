@@ -75,14 +75,29 @@ public class Main {
         StringBuilder visibleText = new StringBuilder(); // 링크 제거 및 표시 문구 유지된 문자열 저장 변수
 
         while (matcher.find()) {
+            String linkAddress = matcher.group(1);
             String linkLabel = matcher.group(2);
 
-            // 표시 문구만 남김(링크의 주소 제거), 주소에 🐱가 있으면 🐱는 남김
-            if (linkLabel == null) {
-                linkLabel = matcher.group(1).contains("\uD83D\uDC31") ? "\uD83D\uDC31" : "";
+            // Slack 그룹 멘션 처리
+            if (linkAddress.matches("!(here|channel|everyone|group)")) {
+                linkLabel = "";
+            }
+            // Slack 날짜 명령어 처리
+            else if (linkAddress.startsWith("!date^")) {
+                String[] dateParts = linkAddress.split("\\^", -1);
+
+                if (dateParts.length >= 3) {
+                    linkLabel = dateParts[2];
+                }
             }
 
-            matcher.appendReplacement(visibleText, Matcher.quoteReplacement(" " + linkLabel + " "));
+            if (linkLabel == null) {
+                linkLabel = linkAddress.contains("\uD83D\uDC31") ? "\uD83D\uDC31" : "";
+            }
+
+            matcher.appendReplacement(
+                    visibleText, Matcher.quoteReplacement(" " + linkLabel + " ")
+            );
         }
 
         matcher.appendTail(visibleText);
@@ -92,10 +107,7 @@ public class Main {
 
     // 고양이 이모지 찾기(:dog:cat:은 안됨, :dog::cat:은 가능)
     public static boolean hasExactWord(String text) {
-        Pattern pattern = Pattern.compile(
-                ":[a-zA-Z0-9_+\\-]+:(?::skin-tone-[2-6]:)?",
-                Pattern.CASE_INSENSITIVE
-        );
+        Pattern pattern = Pattern.compile(":[a-zA-Z0-9_+\\-]+:");
         Matcher matcher = pattern.matcher(text);
 
         while (matcher.find()) {
