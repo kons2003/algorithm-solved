@@ -25,8 +25,8 @@ public class Main {
         String[] linesWithoutCodeBlocks = removeCodeBlocks(fullInput).split("\n", -1);
 
         for (String line : linesWithoutCodeBlocks) {
-            String processedLine = removeInlineCode(line); // 인라인 코드 제거
-            processedLine = removeLinks(processedLine); // 링크 제거
+            String processedLine = removeLinks(line);
+            processedLine = removeInlineCode(processedLine);
 
             // ":cat:" 이거나 🐱이면 YES
             if (hasExactWord(processedLine) || processedLine.contains("\uD83D\uDC31")) {
@@ -79,7 +79,7 @@ public class Main {
 
             // 표시 문구만 남김(링크의 주소 제거), 주소에 🐱가 있으면 🐱는 남김
             if (linkLabel == null) {
-                linkLabel = matcher.group(1);
+                linkLabel = matcher.group(1).contains("\uD83D\uDC31") ? "\uD83D\uDC31" : "";
             }
 
             matcher.appendReplacement(visibleText, Matcher.quoteReplacement(" " + linkLabel + " "));
