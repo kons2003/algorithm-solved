@@ -44,7 +44,38 @@ public class Main {
 
     // 인라인 코드 제거(`:cat:`)
     public static String removeInlineCode(String text) {
-        return removeCode(text, "(?<!`)`\\s*\\S[^`]*?`(?!`)(?=[\\s.,\\])}!?\\-=]|$)");
+        String whitespace = "\\s\\p{Zs}\\u2028\\u2029\\uFEFF";
+
+        Pattern pattern = Pattern.compile(
+                "(^|[" + whitespace + "~_*\\\\/?.,\\-!^;:{(\\[%$#+="
+                        + "\\u2000-\\u206F\\u2E00-\\u2E7F\"])"
+                        + "`([^`\\n]*?[^" + whitespace + "] *)?`");
+
+        Matcher matcher = pattern.matcher(text);
+        char[] chars = text.toCharArray();
+
+        while (matcher.find()) {
+            String body = matcher.group(2);
+
+            // 시작과 종료 백틱 검사 (`:cat:``은 코드, ``:cat:`은 아님)
+            if (body == null || body.isEmpty()
+                    || body.startsWith("`") || body.endsWith("`")) {
+                continue;
+            }
+
+            for (int i = matcher.start() + matcher.group(1).length();
+                 i < matcher.end(); i++) {
+
+                // 🐱이거나 줄바꿈은 유지
+                if (text.startsWith("\uD83D\uDC31", i)) {
+                    i++;
+                } else if (chars[i] != '\n') {
+                    chars[i] = ' ';
+                }
+            }
+        }
+
+        return new String(chars);
     }
 
     // 백틱 3개로 감싼 코드 블록 제거
@@ -72,61 +103,22 @@ public class Main {
         Pattern pattern = Pattern.compile("<([^|>]*)(?:\\|([^>]*))?>");
         Matcher matcher = pattern.matcher(text);
 
-        StringBuilder visibleText = new StringBuilder();
-        List<String> linkLabels = new ArrayList<>();
-
-        String prefix = "LinkPlaceholder";
-
-        // 기존 문자열과 임시 문자열의 중복 방지
-        while (text.contains(prefix)) {
-            prefix += "X";
-        }
+        StringBuilder visibleText = new StringBuilder(); // 링크 제거 및 표시 문구 유지된 문자열 저장 변수
 
         while (matcher.find()) {
             String linkLabel = matcher.group(2);
 
+            // 표시 문구만 남김(링크의 주소 제거), 주소에 🐱가 있으면 🐱는 남김
             if (linkLabel == null) {
-                linkLabel = matcher.group(1).contains("\uD83D\uDC31")
-                        ? "\uD83D\uDC31" : "";
+                linkLabel = matcher.group(1).contains("\uD83D\uDC31") ? "\uD83D\uDC31" : "";
             }
 
-            // 링크를 임시 문자열로 치환
-            String placeholder = prefix + linkLabels.size() + "X";
-            linkLabels.add(linkLabel);
-
-            matcher.appendReplacement(visibleText, placeholder);
+            matcher.appendReplacement(visibleText, Matcher.quoteReplacement(" " + linkLabel + " "));
         }
 
         matcher.appendTail(visibleText);
 
-        String processedText = visibleText.toString();
-
-        // 이모지 이름에 포함된 임시 문자열 제거
-        Matcher emojiMatcher = Pattern
-                .compile(":[\\p{L}\\p{N}_+\\-]+:")
-                .matcher(processedText);
-
-        StringBuilder result = new StringBuilder();
-
-        while (emojiMatcher.find()) {
-            String emoji = emojiMatcher.group();
-
-            emojiMatcher.appendReplacement(result,
-                    Matcher.quoteReplacement(
-                            emoji.contains(prefix) ? " " : emoji));
-        }
-
-        emojiMatcher.appendTail(result);
-
-        processedText = result.toString();
-
-        // 남은 임시 문자열을 표시 문구로 복원
-        for (int i = 0; i < linkLabels.size(); i++) {
-            processedText = processedText.replace(
-                    prefix + i + "X", " " + linkLabels.get(i) + " ");
-        }
-
-        return processedText;
+        return visibleText.toString();
     }
 
     // 고양이 이모지 찾기(:dog:cat:은 안됨, :dog::cat:은 가능, :아:cat: 안됨)
