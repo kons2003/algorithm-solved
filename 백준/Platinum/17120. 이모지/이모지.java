@@ -21,8 +21,6 @@ public class Main {
         // 전체 문자열 한 줄로 합침
         String fullInput = String.join("\n", inputLines);
 
-        fullInput = markLinkEmojis(fullInput);
-
         // 코드 블록 제거 후 줄마다 배열에 저장
         String[] linesWithoutCodeBlocks = removeCodeBlocks(fullInput).split("\n", -1);
 
@@ -81,7 +79,16 @@ public class Main {
 
             // 표시 문구만 남김(링크의 주소 제거), 주소에 🐱가 있으면 🐱는 남김
             if (linkLabel == null) {
-                linkLabel = matcher.group(1).contains("\uD83D\uDC31") ? "\uD83D\uDC31" : "";
+                linkLabel = matcher.group(1).contains("\uD83D\uDC31")
+                        ? "\uD83D\uDC31" : "";
+            } else {
+                // 표시 문구 안의 URL 제거
+                linkLabel = linkLabel.replaceFirst(
+                        "(?i)(?:ftp://|https?://|file://|\\bwww\\.)"
+                                + "[a-z0-9.-]+[a-z]+(?::[a-z0-9]*)?/?"
+                                + "[@a-z0-9._?,'()*/\\\\+&;%:!$#=~\\-]*",
+                        " "
+                );
             }
 
             matcher.appendReplacement(visibleText, Matcher.quoteReplacement(" " + linkLabel + " "));
@@ -107,29 +114,5 @@ public class Main {
         }
 
         return false;
-    }
-
-    // 코드 블록을 제거하기 전에 링크의 이모지 변환
-    public static String markLinkEmojis(String text) {
-        Pattern pattern = Pattern.compile("<([^|>\\n]*)\\|([^>\\n]*)>");
-        Matcher matcher = pattern.matcher(text);
-
-        StringBuilder result = new StringBuilder();
-
-        while (matcher.find()) {
-            String address = matcher.group(1);
-            String linkLabel = removeInlineCode(matcher.group(2));
-
-            // 일반 링크의 표시 문구에 :cat:이 있으면 🐱로 변환
-            if (!address.matches("[#@!%].*") && hasExactWord(linkLabel)) {
-                matcher.appendReplacement(result, " 🐱 ");
-            } else {
-                matcher.appendReplacement(result,
-                        Matcher.quoteReplacement(matcher.group()));
-            }
-        }
-
-        matcher.appendTail(result);
-        return result.toString();
     }
 }
