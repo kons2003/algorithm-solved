@@ -21,6 +21,8 @@ public class Main {
         // 전체 문자열 한 줄로 합침
         String fullInput = String.join("\n", inputLines);
 
+        fullInput = markLinkEmojis(fullInput);
+
         // 코드 블록 제거 후 줄마다 배열에 저장
         String[] linesWithoutCodeBlocks = removeCodeBlocks(fullInput).split("\n", -1);
 
@@ -39,14 +41,12 @@ public class Main {
 
     // 코드 블록 제거(```:cat:```)
     public static String removeCodeBlocks(String text) {
-        text = removeCode(text, "｀｀｀[\\s\\S]+?｀{3,}");
         return removeCode(text, "```[\\s\\S]+?`{3,}");
     }
 
     // 인라인 코드 제거(`:cat:`)
     public static String removeInlineCode(String text) {
-        text = removeCode(text, "(?<!｀)｀\\s*\\S[^｀]*?｀(?!｀)");
-        return removeCode(text, "(?<!`)`\\s*\\S[^`]*?`(?!`)");
+        return removeCode(text, "(?<!`)`\\s*\\S[^`]*?`(?!`)(?=[\\s.,\\])}!?\\-=]|$)");
     }
 
     // 백틱 3개로 감싼 코드 블록 제거
@@ -107,5 +107,29 @@ public class Main {
         }
 
         return false;
+    }
+
+    // 코드 블록을 제거하기 전에 링크의 이모지 변환
+    public static String markLinkEmojis(String text) {
+        Pattern pattern = Pattern.compile("<([^|>\\n]*)\\|([^>\\n]*)>");
+        Matcher matcher = pattern.matcher(text);
+
+        StringBuilder result = new StringBuilder();
+
+        while (matcher.find()) {
+            String address = matcher.group(1);
+            String linkLabel = removeInlineCode(matcher.group(2));
+
+            // 일반 링크의 표시 문구에 :cat:이 있으면 🐱로 변환
+            if (!address.matches("[#@!%].*") && hasExactWord(linkLabel)) {
+                matcher.appendReplacement(result, " 🐱 ");
+            } else {
+                matcher.appendReplacement(result,
+                        Matcher.quoteReplacement(matcher.group()));
+            }
+        }
+
+        matcher.appendTail(result);
+        return result.toString();
     }
 }
