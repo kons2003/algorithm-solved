@@ -44,7 +44,12 @@ public class Main {
 
     // 인라인 코드 제거(`:cat:`)
     public static String removeInlineCode(String text) {
-        return removeCode(text, "(?<!`)`\\s*\\S[^`]*?`(?!`)(?=[\\s.,\\])}!?\\-=]|$)");
+        // JavaScript의 공백 문자 범위 적용
+        String whitespace = "\\s\\p{Zs}\\u2028\\u2029\\uFEFF";
+
+        return removeCode(text,
+                "(?<!`)`[" + whitespace + "]*[^"
+                        + whitespace + "][^`]*?`(?!`)");
     }
 
     // 백틱 3개로 감싼 코드 블록 제거
