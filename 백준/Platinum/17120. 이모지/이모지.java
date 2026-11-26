@@ -39,7 +39,7 @@ public class Main {
 
     // 코드 블록 제거(```:cat:```)
     public static String removeCodeBlocks(String text) {
-        return removeCode(text, "(?<!`)```\\s*\\S[\\s\\S]*?```");
+        return removeCode(text, "```[\\s\\S]+?`{3,}");
     }
 
     // 인라인 코드 제거(`:cat:`)
@@ -49,7 +49,7 @@ public class Main {
 
     // 백틱 3개로 감싼 코드 블록 제거
     public static String removeCode(String text, String regex) {
-        Pattern pattern = Pattern.compile(regex);
+        Pattern pattern = Pattern.compile(regex, Pattern.UNICODE_CHARACTER_CLASS);
         Matcher matcher = pattern.matcher(text);
 
         char[] chars = text.toCharArray();
