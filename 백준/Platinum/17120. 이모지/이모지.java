@@ -28,12 +28,6 @@ public class Main {
             String processedLine = removeInlineCode(line); // 인라인 코드 제거
             processedLine = removeLinks(processedLine); // 링크 제거
 
-            // 기울임꼴 서식 처리
-            processedLine = processedLine.replaceAll(
-                    "(?<![a-zA-Z0-9_])_([^_\\s](?:[^_]*?[^_\\s])?)_(?![a-zA-Z0-9_])",
-                    " $1 "
-            );
-
             // ":cat:" 이거나 🐱이면 YES
             if (hasExactWord(processedLine) || processedLine.contains("\uD83D\uDC31")) {
                 System.out.println("YES");
@@ -96,9 +90,9 @@ public class Main {
         return visibleText.toString();
     }
 
-    // 고양이 이모지 찾기(:dog:cat:은 안됨, :dog::cat:은 가능)
+    // 고양이 이모지 찾기(:dog:cat:은 안됨, :dog::cat:은 가능, :아:cat: 안됨)
     public static boolean hasExactWord(String text) {
-        Pattern pattern = Pattern.compile(":[a-zA-Z0-9_+\\-]+:");
+        Pattern pattern = Pattern.compile(":[\\p{L}\\p{N}_+\\-]+:");
         Matcher matcher = pattern.matcher(text);
 
         while (matcher.find()) {
