@@ -39,17 +39,18 @@ public class Main {
 
     // 코드 블록 제거(```:cat:```)
     public static String removeCodeBlocks(String text) {
-        return removeCode(text, "```[\\s\\S]+?`{3,}");
+        String start = "(?:^|(?<=[\\s_*?.,\\-!^;:{(\\[%$#+="
+                + "\\u2000-\\u206F\\u2E00-\\u2E7F\"]))";
+
+        String end = "(?=$|[\\s_*?.,\\-!^;:})\\]%$#+="
+                + "\\u2000-\\u206F\\u2E00-\\u2E7F…\"])";
+
+        return removeCode(text, start + "```[\\s\\S]+?`{3,}" + end);
     }
 
     // 인라인 코드 제거(`:cat:`)
     public static String removeInlineCode(String text) {
-        // 백틱 앞에 올 수 있는 문자 제한
-        String boundary = "(?:^|(?<=[\\s~_*\\\\/?.,\\-!^;:{(\\[%$#+="
-                + "\\u2000-\\u206F\\u2E00-\\u2E7F\"]))";
-
-        return removeCode(text,
-                boundary + "(?<!`)`\\s*\\S[^`]*?`(?!`)");
+        return removeCode(text, "(?<!`)`\\s*\\S[^`]*?`(?!`)(?=[\\s.,\\])}!?\\-=]|$)");
     }
 
     // 백틱 3개로 감싼 코드 블록 제거
