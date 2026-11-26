@@ -79,17 +79,7 @@ public class Main {
 
             // 표시 문구만 남김(링크의 주소 제거), 주소에 🐱가 있으면 🐱는 남김
             if (linkLabel == null) {
-                String address = matcher.group(1);
-
-                // 정의되지 않은 특수 명령어는 텍스트 유지
-                if (address.startsWith("!")
-                        && !address.matches("!(here|channel|group|everyone)")
-                        && !address.startsWith("!subteam^")
-                        && !address.startsWith("!date^")) {
-                    linkLabel = address.substring(1);
-                } else {
-                    linkLabel = address.contains("\uD83D\uDC31") ? "\uD83D\uDC31" : "";
-                }
+                linkLabel = matcher.group(1).contains("\uD83D\uDC31") ? "\uD83D\uDC31" : "";
             }
 
             matcher.appendReplacement(visibleText, Matcher.quoteReplacement(" " + linkLabel + " "));
@@ -102,7 +92,9 @@ public class Main {
 
     // 고양이 이모지 찾기(:dog:cat:은 안됨, :dog::cat:은 가능, :아:cat: 안됨)
     public static boolean hasExactWord(String text) {
-        Pattern pattern = Pattern.compile(":[\\p{L}\\p{N}_+.\\-]+:");
+        Pattern pattern = Pattern.compile(
+                ":[[\\p{L}\\p{N}_+\\-]&&[\\x{0}-\\x{FFFF}]]+:"
+        );
         Matcher matcher = pattern.matcher(text);
 
         while (matcher.find()) {
