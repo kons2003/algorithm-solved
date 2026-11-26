@@ -69,7 +69,7 @@ public class Main {
 
     // 링크 주소 제거 및 표시 문구 유지(https://example.com|:cat: -> :cat:
     public static String removeLinks(String text) {
-        Pattern pattern = Pattern.compile("<([^|>]*)(?:\\|([^|>]*)(?:\\|[^>]*)?)?>");
+        Pattern pattern = Pattern.compile("<([^|>]*)(?:\\|([^>]*))?>");
         Matcher matcher = pattern.matcher(text);
 
         StringBuilder visibleText = new StringBuilder(); // 링크 제거 및 표시 문구 유지된 문자열 저장 변수
@@ -92,7 +92,10 @@ public class Main {
 
     // 고양이 이모지 찾기(:dog:cat:은 안됨, :dog::cat:은 가능)
     public static boolean hasExactWord(String text) {
-        Pattern pattern = Pattern.compile(":[a-zA-Z0-9_+\\-]+:");
+        Pattern pattern = Pattern.compile(
+                ":[a-zA-Z0-9_+\\-]+:(?::skin-tone-[2-6]:)?",
+                Pattern.CASE_INSENSITIVE
+        );
         Matcher matcher = pattern.matcher(text);
 
         while (matcher.find()) {
