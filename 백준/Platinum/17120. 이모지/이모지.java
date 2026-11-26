@@ -39,13 +39,7 @@ public class Main {
 
     // 코드 블록 제거(```:cat:```)
     public static String removeCodeBlocks(String text) {
-        String start = "(?:^|(?<=[\\s_*?.,\\-!^;:{(\\[%$#+="
-                + "\\u2000-\\u206F\\u2E00-\\u2E7F\"]))";
-
-        String end = "(?=$|[\\s_*?.,\\-!^;:})\\]%$#+="
-                + "\\u2000-\\u206F\\u2E00-\\u2E7F…\"])";
-
-        return removeCode(text, start + "```[\\s\\S]+?`{3,}" + end);
+        return removeCode(text, "```[\\s\\S]+?`{3,}");
     }
 
     // 인라인 코드 제거(`:cat:`)
@@ -81,11 +75,21 @@ public class Main {
         StringBuilder visibleText = new StringBuilder(); // 링크 제거 및 표시 문구 유지된 문자열 저장 변수
 
         while (matcher.find()) {
+            String address = matcher.group(1);
             String linkLabel = matcher.group(2);
 
-            // 표시 문구만 남김(링크의 주소 제거), 주소에 🐱가 있으면 🐱는 남김
             if (linkLabel == null) {
-                linkLabel = matcher.group(1).contains("\uD83D\uDC31") ? "\uD83D\uDC31" : "";
+                linkLabel = address.contains("\uD83D\uDC31")
+                        ? "\uD83D\uDC31" : "";
+            } else {
+                linkLabel = linkLabel.trim();
+
+                // 주소와 표시 문구가 동일하면 이모지 변환 제외
+                if (linkLabel.equals(address)
+                        || linkLabel.equals(address.replaceFirst("^\\w+://", ""))) {
+                    linkLabel = linkLabel.contains("\uD83D\uDC31")
+                            ? "\uD83D\uDC31" : "";
+                }
             }
 
             matcher.appendReplacement(visibleText, Matcher.quoteReplacement(" " + linkLabel + " "));
