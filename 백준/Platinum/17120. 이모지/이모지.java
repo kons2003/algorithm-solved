@@ -69,7 +69,7 @@ public class Main {
 
     // 링크 주소 제거 및 표시 문구 유지(https://example.com|:cat: -> :cat:
     public static String removeLinks(String text) {
-        Pattern pattern = Pattern.compile("<([^<>|\\s]+)(?:\\|([^<>]*))?>");
+        Pattern pattern = Pattern.compile("<([^|>]*)(?:\\|([^>]*))?>");
         Matcher matcher = pattern.matcher(text);
 
         StringBuilder visibleText = new StringBuilder(); // 링크 제거 및 표시 문구 유지된 문자열 저장 변수
@@ -78,8 +78,11 @@ public class Main {
             String linkLabel = matcher.group(2);
 
             // 표시 문구만 남김(링크의 주소 제거), 주소에 🐱가 있으면 🐱는 남김
+            // 표시 문구가 없거나 표시 문구 자체가 URL인 경우
             if (linkLabel == null) {
                 linkLabel = matcher.group(1).contains("\uD83D\uDC31") ? "\uD83D\uDC31" : "";
+            } else if (linkLabel.matches("(?i)(?:https?://|ftp://|www\\.)\\S+")) {
+                linkLabel = linkLabel.contains("\uD83D\uDC31") ? "\uD83D\uDC31" : "";
             }
 
             matcher.appendReplacement(visibleText, Matcher.quoteReplacement(" " + linkLabel + " "));
