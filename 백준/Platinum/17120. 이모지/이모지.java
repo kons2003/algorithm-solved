@@ -44,7 +44,7 @@ public class Main {
 
     // 인라인 코드 제거(`:cat:`)
     public static String removeInlineCode(String text) {
-        return removeCode(text, "(?<!`)`\\s*\\S[^`]*?`(?!`)");
+        return removeCode(text, "(?<!`)`\\s*\\S[^`]*?`(?!`)(?=[\\s.,\\])}!?\\-=]|$)");
     }
 
     // 백틱 3개로 감싼 코드 블록 제거
@@ -92,9 +92,7 @@ public class Main {
 
     // 고양이 이모지 찾기(:dog:cat:은 안됨, :dog::cat:은 가능, :아:cat: 안됨)
     public static boolean hasExactWord(String text) {
-        Pattern pattern = Pattern.compile(
-                ":(?:[\\p{L}\\p{N}_][\\p{L}\\p{N}_+\\-]*|[+-][0-9]+):"
-        );
+        Pattern pattern = Pattern.compile(":[\\p{L}\\p{N}_+.\\-]+:");
         Matcher matcher = pattern.matcher(text);
 
         while (matcher.find()) {
