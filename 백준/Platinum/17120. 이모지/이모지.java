@@ -19,14 +19,16 @@ public class Main {
         }
 
         // 전체 문자열 한 줄로 합침
-        String fullInput = String.join("\n", inputLines);
+        String fullInput = String.join("\n", inputLines)
+                .replace("\uE04F", "\uD83D\uDC31")
+                .replace(new String(Character.toChars(0xFE1B8)), "\uD83D\uDC31");
 
         // 코드 블록 제거 후 줄마다 배열에 저장
         String[] linesWithoutCodeBlocks = removeCodeBlocks(fullInput).split("\n", -1);
 
         for (String line : linesWithoutCodeBlocks) {
-            String processedLine = removeLinks(line);
-            processedLine = removeInlineCode(processedLine);
+            String processedLine = removeInlineCode(line); // 인라인 코드 제거
+            processedLine = removeLinks(processedLine); // 링크 제거
 
             // ":cat:" 이거나 🐱이면 YES
             if (hasExactWord(processedLine) || processedLine.contains("\uD83D\uDC31")) {
