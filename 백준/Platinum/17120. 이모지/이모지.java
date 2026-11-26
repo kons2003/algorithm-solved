@@ -38,7 +38,7 @@ public class Main {
 
     // 백틱 3개 이상으로 감싼 코드 블록 제거
     public static String removeCodeBlocks(String text) {
-        Pattern pattern = Pattern.compile("`{3,}[\\s\\S]*?`{3,}");
+        Pattern pattern = Pattern.compile("```[\\s\\S]+?`{3,}");
         Matcher matcher = pattern.matcher(text);
 
         char[] chars = text.toCharArray();
