@@ -39,12 +39,14 @@ public class Main {
 
     // 코드 블록 제거(```:cat:```)
     public static String removeCodeBlocks(String text) {
+        text = removeCode(text, "｀｀｀[\\s\\S]+?｀{3,}");
         return removeCode(text, "```[\\s\\S]+?`{3,}");
     }
 
     // 인라인 코드 제거(`:cat:`)
     public static String removeInlineCode(String text) {
-        return removeCode(text, "(?<!`)`\\s*\\S[^`]*?`(?!`)(?=[\\s.,\\])}!?\\-=]|$)");
+        text = removeCode(text, "(?<!｀)｀\\s*\\S[^｀]*?｀(?!｀)");
+        return removeCode(text, "(?<!`)`\\s*\\S[^`]*?`(?!`)");
     }
 
     // 백틱 3개로 감싼 코드 블록 제거
@@ -92,19 +94,13 @@ public class Main {
 
     // 고양이 이모지 찾기(:dog:cat:은 안됨, :dog::cat:은 가능, :아:cat: 안됨)
     public static boolean hasExactWord(String text) {
-        // Slack 이모지 이름의 허용 문자
-        String emojiChars = "a-zA-Z0-9"
-                + "àáâäãèéêëíîïóöôõœúùûüÿçßñÀÁÂÄÃÈÉÊËÍÎÏÓÖÔÕŒÚÙÛÜŸÇÑ"
-                + "\\u3041-\\u3096\\u30A0-\\u30FF\\uFF61-\\uFF9F"
-                + "\\u3400-\\u4DB5\\u4E00-\\u9FCB\\u8C48-\\uFA6A"
-                + "\\u2E80-\\u2FD5\\uFF41-\\uFF5A\\uFF10-\\uFF19"
-                + "_+'\\uFF3F\\uFF0B\\u30FC\\u3005\\-"
-                + "\\x{10000}-\\x{10FFFF}";
-
-        Pattern pattern = Pattern.compile(":[" + emojiChars + "]+:");
+        Pattern pattern = Pattern.compile(
+                ":[[\\p{L}\\p{N}_+\\-]&&[\\x{0}-\\x{FFFF}]]+:"
+        );
         Matcher matcher = pattern.matcher(text);
 
         while (matcher.find()) {
+            // 대소문자 구분 없이 검사 (:cat:, :CAT:)
             if (matcher.group().equalsIgnoreCase(":cat:")) {
                 return true;
             }
