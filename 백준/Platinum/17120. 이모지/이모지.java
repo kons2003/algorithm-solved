@@ -80,10 +80,6 @@ public class Main {
             // 표시 문구만 남김(링크의 주소 제거), 주소에 🐱가 있으면 🐱는 남김
             if (linkLabel == null) {
                 linkLabel = matcher.group(1).contains("\uD83D\uDC31") ? "\uD83D\uDC31" : "";
-            // 사용자 및 채널 멘션의 표시 문구 처리
-            } else if (matcher.group(1).startsWith("@U")
-                    || matcher.group(1).startsWith("#C")) {
-                linkLabel = linkLabel.contains("\uD83D\uDC31") ? "\uD83D\uDC31" : "";
             }
 
             matcher.appendReplacement(visibleText, Matcher.quoteReplacement(" " + linkLabel + " "));
@@ -96,7 +92,7 @@ public class Main {
 
     // 고양이 이모지 찾기(:dog:cat:은 안됨, :dog::cat:은 가능, :아:cat: 안됨)
     public static boolean hasExactWord(String text) {
-        Pattern pattern = Pattern.compile(":[\\p{L}\\p{N}_+\\-]+:");
+        Pattern pattern = Pattern.compile(":[\\p{L}\\p{N}_+.\\-]+:");
         Matcher matcher = pattern.matcher(text);
 
         while (matcher.find()) {
