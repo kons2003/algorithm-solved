@@ -93,10 +93,17 @@ function markCode(nodes) {
         node.type === "text" ? node.value : "\uFFFC"
     ).join("");
 
-    const inline = /(?:^|(?<=[\s~_*\\/?.,\-!^;:{(\[%$#+=\u2000-\u206F\u2E00-\u2E7F"\uFFFC]))(?<!`)`\s*\S[^`]*?`(?!`)|(?<!｀)｀\s*\S[^｀]*?｀(?!｀)/g;
+    const inline = /(^|[\s~_*\\/?.,\-!^;:{(\[%$#+=\u2000-\u206F\u2E00-\u2E7F"\uFFFC])`([^`\n]*?\S *)?`/g;
 
     for (const match of view.matchAll(inline)) {
-        for (let i = match.index; i < match.index + match[0].length; i++) {
+        const body = match[2];
+    
+        if (!body || body.startsWith("`") || body.endsWith("`")) {
+            continue;
+        }
+    
+        for (let i = match.index + match[1].length;
+             i < match.index + match[0].length; i++) {
             if (nodes[i].type === "text") {
                 nodes[i].type = "code";
             }
