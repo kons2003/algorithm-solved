@@ -28,6 +28,12 @@ public class Main {
             String processedLine = removeInlineCode(line); // 인라인 코드 제거
             processedLine = removeLinks(processedLine); // 링크 제거
 
+            // 기울임꼴 서식 처리
+            processedLine = processedLine.replaceAll(
+                    "(?<![a-zA-Z0-9_])_([^_\\s](?:[^_]*?[^_\\s])?)_(?![a-zA-Z0-9_])",
+                    " $1 "
+            );
+
             // ":cat:" 이거나 🐱이면 YES
             if (hasExactWord(processedLine) || processedLine.contains("\uD83D\uDC31")) {
                 System.out.println("YES");
@@ -78,11 +84,8 @@ public class Main {
             String linkLabel = matcher.group(2);
 
             // 표시 문구만 남김(링크의 주소 제거), 주소에 🐱가 있으면 🐱는 남김
-            // 표시 문구가 없거나 표시 문구 자체가 URL인 경우
             if (linkLabel == null) {
                 linkLabel = matcher.group(1).contains("\uD83D\uDC31") ? "\uD83D\uDC31" : "";
-            } else if (linkLabel.matches("(?i)(?:https?://|ftp://|www\\.)\\S+")) {
-                linkLabel = linkLabel.contains("\uD83D\uDC31") ? "\uD83D\uDC31" : "";
             }
 
             matcher.appendReplacement(visibleText, Matcher.quoteReplacement(" " + linkLabel + " "));
