@@ -19,7 +19,8 @@ public class Main {
         }
 
         // 전체 문자열 한 줄로 합침
-        String fullInput = String.join("\n", inputLines);
+        String fullInput = String.join("\n", inputLines)
+                .replaceAll("(?i)&#(?:0*128049|x0*1f431);", "\uD83D\uDC31"); // HTML 숫자 문자 표현 치환
 
         // 코드 블록 제거 후 줄마다 배열에 저장
         String[] linesWithoutCodeBlocks = removeCodeBlocks(fullInput).split("\n", -1);
