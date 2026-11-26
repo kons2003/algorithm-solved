@@ -69,35 +69,20 @@ public class Main {
 
     // 링크 주소 제거 및 표시 문구 유지(https://example.com|:cat: -> :cat:
     public static String removeLinks(String text) {
-        Pattern pattern = Pattern.compile("<([^|>]*)(?:\\|([^>]*))?>");
+        Pattern pattern = Pattern.compile("<([^<>|\\s]+)(?:\\|([^<>]*))?>");
         Matcher matcher = pattern.matcher(text);
 
         StringBuilder visibleText = new StringBuilder(); // 링크 제거 및 표시 문구 유지된 문자열 저장 변수
 
         while (matcher.find()) {
-            String linkAddress = matcher.group(1);
             String linkLabel = matcher.group(2);
 
-            // Slack 그룹 멘션 처리
-            if (linkAddress.matches("!(here|channel|everyone|group)")) {
-                linkLabel = "";
-            }
-            // Slack 날짜 명령어 처리
-            else if (linkAddress.startsWith("!date^")) {
-                String[] dateParts = linkAddress.split("\\^", -1);
-
-                if (dateParts.length >= 3) {
-                    linkLabel = dateParts[2];
-                }
-            }
-
+            // 표시 문구만 남김(링크의 주소 제거), 주소에 🐱가 있으면 🐱는 남김
             if (linkLabel == null) {
-                linkLabel = linkAddress.contains("\uD83D\uDC31") ? "\uD83D\uDC31" : "";
+                linkLabel = matcher.group(1).contains("\uD83D\uDC31") ? "\uD83D\uDC31" : "";
             }
 
-            matcher.appendReplacement(
-                    visibleText, Matcher.quoteReplacement(" " + linkLabel + " ")
-            );
+            matcher.appendReplacement(visibleText, Matcher.quoteReplacement(" " + linkLabel + " "));
         }
 
         matcher.appendTail(visibleText);
