@@ -28,6 +28,12 @@ public class Main {
             String processedLine = removeInlineCode(line); // 인라인 코드 제거
             processedLine = removeLinks(processedLine); // 링크 제거
 
+            // 일반 URL 내부의 이모지 코드 제거
+            processedLine = removeCode(
+                    processedLine,
+                    "(?i)(?:https?://|ftp://|www\\.)[^\\s<>]+"
+            );
+
             // ":cat:" 이거나 🐱이면 YES
             if (hasExactWord(processedLine) || processedLine.contains("\uD83D\uDC31")) {
                 System.out.println("YES");
@@ -44,10 +50,7 @@ public class Main {
 
     // 인라인 코드 제거(`:cat:`)
     public static String removeInlineCode(String text) {
-        return removeCode(
-                text,
-                "(?<![^\\s.,(\\[{!?=\\-])`\\s*\\S[^`]*?`(?!`)(?=[\\s.,\\])}!?\\-=]|$)"
-        );
+        return removeCode(text, "(?<!`)`\\s*\\S[^`]*?`(?!`)(?=[\\s.,\\])}!?\\-=]|$)");
     }
 
     // 백틱 3개로 감싼 코드 블록 제거
@@ -70,7 +73,7 @@ public class Main {
         return new String(chars);
     }
 
-    // 링크 주소 제거 및 표시 문구 유지(https://example.com|:cat: -> :cat:
+    // 링크 주소 제거 및 표시 문구 유지(https://example.com|:cat: -> :cat:)
     public static String removeLinks(String text) {
         Pattern pattern = Pattern.compile("<([^|>]*)(?:\\|([^>]*))?>");
         Matcher matcher = pattern.matcher(text);
