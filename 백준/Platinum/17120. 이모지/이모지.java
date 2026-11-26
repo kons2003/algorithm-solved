@@ -24,13 +24,12 @@ public class Main {
         // 코드 블록 제거 후 줄마다 배열에 저장
         String[] linesWithoutCodeBlocks = removeCodeBlocks(fullInput).split("\n", -1);
 
-        for (int i = 0; i < inputLines.size(); i++) {
-            String processedLine = removeInlineCode(linesWithoutCodeBlocks[i]);
-            processedLine = removeLinks(processedLine);
+        for (String line : linesWithoutCodeBlocks) {
+            String processedLine = removeInlineCode(line); // 인라인 코드 제거
+            processedLine = removeLinks(processedLine); // 링크 제거
 
-            // 가공된 문자열의 :cat:과 원본의 실제 🐱 검사
-            if (hasExactWord(processedLine)
-                    || inputLines.get(i).contains("\uD83D\uDC31")) {
+            // ":cat:" 이거나 🐱이면 YES
+            if (hasExactWord(processedLine) || processedLine.contains("\uD83D\uDC31")) {
                 System.out.println("YES");
             } else {
                 System.out.println("NO");
@@ -40,7 +39,7 @@ public class Main {
 
     // 코드 블록 제거(```:cat:```)
     public static String removeCodeBlocks(String text) {
-        return removeCode(text, "```[\\s\\S]+?`{3,}");
+        return removeCode(text, "(?<!`)```\\s*\\S[\\s\\S]*?```");
     }
 
     // 인라인 코드 제거(`:cat:`)
