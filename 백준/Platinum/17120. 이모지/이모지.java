@@ -28,6 +28,11 @@ public class Main {
             String processedLine = removeInlineCode(line); // 인라인 코드 제거
             processedLine = removeLinks(processedLine); // 링크 제거
 
+            // IPv6 주소로 인식되는 문자열 제거
+            processedLine = removeCode(processedLine,
+                    "(?i)(?:^|[^:A-F0-9])(?:[A-F0-9]{1,4}:){7}"
+                            + "[A-F0-9]{1,4}(?:[^:A-F0-9]|$)");
+
             // ":cat:" 이거나 🐱이면 YES
             if (hasExactWord(processedLine) || processedLine.contains("\uD83D\uDC31")) {
                 System.out.println("YES");
@@ -79,16 +84,7 @@ public class Main {
 
             // 표시 문구만 남김(링크의 주소 제거), 주소에 🐱가 있으면 🐱는 남김
             if (linkLabel == null) {
-                linkLabel = matcher.group(1).contains("\uD83D\uDC31")
-                        ? "\uD83D\uDC31" : "";
-            } else {
-                // 표시 문구 안의 URL 제거
-                linkLabel = linkLabel.replaceFirst(
-                        "(?i)(?:ftp://|https?://|file://|\\bwww\\.)"
-                                + "[a-z0-9.-]+[a-z]+(?::[a-z0-9]*)?/?"
-                                + "[@a-z0-9._?,'()*/\\\\+&;%:!$#=~\\-]*",
-                        " "
-                );
+                linkLabel = matcher.group(1).contains("\uD83D\uDC31") ? "\uD83D\uDC31" : "";
             }
 
             matcher.appendReplacement(visibleText, Matcher.quoteReplacement(" " + linkLabel + " "));
