@@ -129,7 +129,15 @@ function isNameChar(node) {
 
 // 고양이 이모지 검사
 function hasCat(text, parseLinks = true) {
+    // 유니코드 줄바꿈 처리
+    if (/[\u2028\u2029]/.test(text)) {
+        return text.split(/[\u2028\u2029]/)
+            .some(part => hasCat(part, parseLinks));
+    }
+
     const nodes = tokenize(text, parseLinks);
+
+    // 이하 기존 코드 유지
 
     markCode(nodes);
 
